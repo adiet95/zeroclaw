@@ -464,6 +464,20 @@ from the environment the same way as any other provider key (see
 > OAuth, or provider-specific credential storage. Set `api_key` (or its env
 > injection) to run inference.
 
+### 9Router: slot `nine_router`
+
+```toml
+[providers.models.nine_router.local]
+model   = "claude-3-7-sonnet"
+# uri   = "http://localhost:20128/v1"  # local default; omit unless customized
+# api_key = "..."                      # optional, set if auth is configured in 9Router
+```
+
+Local-first smart AI gateway / router ([decolua/9router](https://github.com/decolua/9router)).
+Defaults to `http://localhost:20128/v1` over the OpenAI-compatible chat completions wire.
+Does not require an API key by default when communicating with a local 9Router instance.
+In `model_provider` references, both `nine_router.<alias>` and `9router.<alias>` are recognized.
+
 ---
 
 ## All slots

@@ -3145,6 +3145,31 @@ pub struct LitellmModelProviderConfig {
     pub base: ModelProviderConfig,
 }
 
+// ── 9Router (operator-local router) ──
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[cfg_attr(feature = "schema-export", derive(schemars::JsonSchema))]
+#[serde(rename_all = "snake_case")]
+pub enum NineRouterEndpoint {
+    #[default]
+    LocalDefault,
+}
+impl ModelEndpoint for NineRouterEndpoint {
+    fn uri(&self) -> &'static str {
+        match self {
+            Self::LocalDefault => "http://localhost:20128/v1",
+        }
+    }
+}
+#[derive(Debug, Clone, Default, Serialize, Deserialize, Configurable)]
+#[cfg_attr(feature = "schema-export", derive(schemars::JsonSchema))]
+#[prefix = "providers.models.nine_router"]
+pub struct NineRouterModelProviderConfig {
+    #[nested]
+    #[serde(flatten)]
+    pub base: ModelProviderConfig,
+}
+
 // ── Lepton ──
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
@@ -3680,6 +3705,7 @@ impl_default_family_endpoint! {
     VllmModelProviderConfig,
     OsaurusModelProviderConfig,
     LitellmModelProviderConfig,
+    NineRouterModelProviderConfig,
     LeptonModelProviderConfig,
     ManifestModelProviderConfig,
     MorphModelProviderConfig,

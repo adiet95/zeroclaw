@@ -643,6 +643,8 @@ fn normalize_provider_type(
         "lmstudio" | "lm-studio" => Some("lmstudio"),
         // LiteLLM: was litellm|lite-llm
         "litellm" | "lite-llm" => Some("litellm"),
+        // 9Router: was 9router|9-router|nine-router|nine_router
+        "9router" | "9-router" | "nine-router" | "nine_router" => Some("nine_router"),
         // HuggingFace: was huggingface|hf
         "huggingface" | "hf" => Some("huggingface"),
         // Yi: was yi|01ai|lingyiwanwu

@@ -66,7 +66,7 @@ pub use schema::{
     HyperbolicModelProviderConfig, KiloCliModelProviderConfig, LeptonModelProviderConfig,
     LitellmModelProviderConfig, LlamacppModelProviderConfig, LmstudioModelProviderConfig,
     MinimaxModelProviderConfig, MistralModelProviderConfig, MoonshotModelProviderConfig,
-    NebiusModelProviderConfig, NovitaModelProviderConfig, NscaleModelProviderConfig,
+    NebiusModelProviderConfig, NineRouterModelProviderConfig, NovitaModelProviderConfig, NscaleModelProviderConfig,
     NvidiaModelProviderConfig, OllamaModelProviderConfig, OpenAIModelProviderConfig,
     OpenRouterModelProviderConfig, OpencodeModelProviderConfig, OsaurusModelProviderConfig,
     OvhModelProviderConfig, PerplexityModelProviderConfig, QianfanModelProviderConfig,

@@ -3,7 +3,7 @@
 Three ways to add a provider ZeroClaw doesn't ship with:
 
 1. **Use the `custom` slot.** For any OpenAI-compatible endpoint not covered by an existing canonical slot.
-2. **Use the first-class local-server slots** (`lmstudio`, `llamacpp`, `sglang`, `vllm`, `osaurus`, `litellm`). Thin wrappers with sensible defaults.
+2. **Use the first-class local-server slots** (`lmstudio`, `llamacpp`, `sglang`, `vllm`, `osaurus`, `litellm`, `nine_router`). Thin wrappers with sensible defaults.
 3. **Implement the `ModelProvider` trait** in Rust. For anything that's not OpenAI-compatible.
 
 ## OpenAI-compatible endpoint: use the `custom` slot
@@ -76,9 +76,9 @@ vllm serve meta-llama/Llama-3.1-8B-Instruct
 
 </div>
 
-### LM Studio, Osaurus, LiteLLM
+### LM Studio, Osaurus, LiteLLM, 9Router
 
-Slots `lmstudio`, `osaurus`, `litellm` follow the same pattern, see the [catalog](./catalog.md).
+Slots `lmstudio`, `osaurus`, `litellm`, `nine_router` follow the same pattern, see the [catalog](./catalog.md).
 
 ## Wire protocol: `wire_api = "responses"`
 

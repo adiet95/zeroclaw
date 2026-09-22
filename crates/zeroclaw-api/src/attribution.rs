@@ -317,6 +317,7 @@ pub enum ModelProviderKind {
     Synthetic,
     Opencode,
     Zerorouter,
+    NineRouter,
     Custom,
     Plugin,
 }
@@ -574,5 +575,13 @@ mod tests {
     #[test]
     fn crusoe_kind_serializes_snake_case() {
         assert_eq!(<&'static str>::from(ModelProviderKind::Crusoe), "crusoe");
+    }
+
+    #[test]
+    fn nine_router_kind_serializes_snake_case() {
+        assert_eq!(
+            <&'static str>::from(ModelProviderKind::NineRouter),
+            "nine_router"
+        );
     }
 }

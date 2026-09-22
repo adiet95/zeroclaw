@@ -561,7 +561,7 @@ use zeroclaw_config::schema::{
     LlamacppModelProviderConfig, LmstudioModelProviderConfig, ManifestModelProviderConfig,
     MinimaxModelProviderConfig, MistralModelProviderConfig, MoonshotEndpoint,
     MoonshotModelProviderConfig, MorphModelProviderConfig, NearaiModelProviderConfig,
-    NebiusModelProviderConfig, NovitaModelProviderConfig, NscaleModelProviderConfig,
+    NebiusModelProviderConfig, NineRouterModelProviderConfig, NovitaModelProviderConfig, NscaleModelProviderConfig,
     NvidiaModelProviderConfig, OllamaModelProviderConfig, OpenAIModelProviderConfig,
     OpenRouterModelProviderConfig, OpencodeModelProviderConfig, OsaurusModelProviderConfig,
     OvhModelProviderConfig, PerplexityModelProviderConfig, QianfanModelProviderConfig,
@@ -758,6 +758,12 @@ impl CompatFamilySpec for AihubmixModelProviderConfig {
 impl CompatFamilySpec for LitellmModelProviderConfig {
     const DISPLAY: &'static str = "LiteLLM";
     const DEFAULT_URL: &'static str = "http://localhost:4000/v1";
+    const AUTH: AuthStyle = AuthStyle::Bearer;
+    const FALLBACK_ALLOWS_MISSING_API_KEY: bool = true;
+}
+impl CompatFamilySpec for NineRouterModelProviderConfig {
+    const DISPLAY: &'static str = "9Router";
+    const DEFAULT_URL: &'static str = "http://localhost:20128/v1";
     const AUTH: AuthStyle = AuthStyle::Bearer;
     const FALLBACK_ALLOWS_MISSING_API_KEY: bool = true;
 }
