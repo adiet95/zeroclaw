@@ -6,6 +6,16 @@ The desktop app is a thin shell over a running ZeroClaw **web gateway**. There
 is no longer a macOS/Windows/Linux permission-setup wizard — the app goes
 straight to the gateway, and first-time setup happens in the web Quickstart.
 
+The system tray menu includes `Toggle Service`. Turning the service off stops
+only the daemon supervisor owned by this desktop app; the desktop window and
+tray remain open. Turning it on starts the supervisor again. A daemon that was
+already running before the app launched is reused but is not stopped by this
+toggle.
+
+On Windows, `zeroclaw desktop` launches the companion app in a new process
+group without attaching a console, so closing the launching terminal does not
+close or stop the desktop app.
+
 On launch:
 
 1. A small **splash** window (`apps/tauri/splash/index.html`) appears and polls

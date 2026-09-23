@@ -13,7 +13,9 @@ use std::time::Instant;
 // Keep this wire-protocol limit aligned with DESKTOP_READINESS_FRAME_MAX_BYTES
 // in zeroclaw-runtime's service module.
 const READINESS_FRAME_MAX_BYTES: usize = 4096;
-const CAPABILITY_PROBE_TIMEOUT: Duration = Duration::from_secs(2);
+// Windows process startup can be delayed by antivirus scanning, especially
+// for a bundled kernel launched from a GUI.
+const CAPABILITY_PROBE_TIMEOUT: Duration = Duration::from_secs(10);
 
 #[cfg(unix)]
 const SIGTERM: i32 = 15;
@@ -153,6 +155,11 @@ pub fn spawn_daemon(binary: &Path, port: u16) -> std::io::Result<Child> {
             terminate_supervisor_tree(&mut child),
         )),
     }
+}
+
+/// Stop a supervisor and the daemon process tree owned by it.
+pub fn stop_daemon(child: &mut Child) -> std::io::Result<()> {
+    terminate_supervisor_tree(child)
 }
 
 fn validate_readiness_frame<F>(

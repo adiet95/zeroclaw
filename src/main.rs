@@ -7555,7 +7555,17 @@ Add pricing to the active provider profile or supply a catalog entry."
                             "Launching ZeroClaw companion app..."
                         )
                     );
-                    let _child = std::process::Command::new(&bin)
+                    let mut command = std::process::Command::new(&bin);
+                    command.stdin(std::process::Stdio::null());
+                    command.stdout(std::process::Stdio::null());
+                    command.stderr(std::process::Stdio::null());
+                    #[cfg(windows)]
+                    {
+                        use std::os::windows::process::CommandExt;
+                        // CREATE_NEW_PROCESS_GROUP | CREATE_NO_WINDOW.
+                        command.creation_flags(0x0000_0200 | 0x0800_0000);
+                    }
+                    let _child = command
                         .spawn()
                         .with_context(|| format!("Failed to launch {}", bin.display()))?;
                     Ok(())

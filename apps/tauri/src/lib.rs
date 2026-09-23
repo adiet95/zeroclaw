@@ -31,7 +31,10 @@ struct SplashStatus {
 /// Ensure a gateway/daemon is reachable: reuse one if it already answers,
 /// otherwise launch a fresh `zeroclaw daemon`. The splash window's health
 /// polling takes over once the daemon is up and opens the dashboard.
-async fn ensure_daemon(app: tauri::AppHandle, state: state::SharedState) {
+async fn ensure_daemon<R: tauri::Runtime>(app: tauri::AppHandle<R>, state: state::SharedState) {
+    if !state.read().await.service_enabled {
+        return;
+    }
     let url = {
         let s = state.read().await;
         s.gateway_url.clone()
@@ -57,14 +60,35 @@ async fn ensure_daemon(app: tauri::AppHandle, state: state::SharedState) {
                     message: "Starting the ZeroClaw daemon…".to_string(),
                 },
             );
-            if let Err(e) = daemon::spawn_daemon(&bin, GATEWAY_PORT) {
-                let _ = app.emit(
-                    "zeroclaw://splash-status",
-                    SplashStatus {
-                        kind: "error",
-                        message: format!("Couldn't start the ZeroClaw daemon: {e}"),
-                    },
-                );
+            match daemon::spawn_daemon(&bin, GATEWAY_PORT) {
+                Ok(child) => {
+                    let mut child = Some(child);
+                    let should_stop = {
+                        let current = state.write().await;
+                        if current.service_enabled {
+                            *current
+                                .owned_daemon
+                                .lock()
+                                .unwrap_or_else(|e| e.into_inner()) = child.take();
+                            false
+                        } else {
+                            true
+                        }
+                    };
+                    if should_stop {
+                        let mut child = child.expect("newly spawned daemon must be available");
+                        let _ = daemon::stop_daemon(&mut child);
+                    }
+                }
+                Err(e) => {
+                    let _ = app.emit(
+                        "zeroclaw://splash-status",
+                        SplashStatus {
+                            kind: "error",
+                            message: format!("Couldn't start the ZeroClaw daemon: {e}"),
+                        },
+                    );
+                }
             }
             // On success the splash's health poll detects the daemon and
             // calls `open_dashboard`.
@@ -80,6 +104,33 @@ async fn ensure_daemon(app: tauri::AppHandle, state: state::SharedState) {
                 },
             );
         }
+    }
+}
+
+pub(crate) async fn toggle_service<R: tauri::Runtime>(
+    app: tauri::AppHandle<R>,
+    state: state::SharedState,
+) {
+    let (service_enabled, daemon_to_stop) = {
+        let mut current = state.write().await;
+        current.service_enabled = !current.service_enabled;
+        let daemon_to_stop = if current.service_enabled {
+            None
+        } else {
+            current
+                .owned_daemon
+                .lock()
+                .unwrap_or_else(|e| e.into_inner())
+                .take()
+        };
+        (current.service_enabled, daemon_to_stop)
+    };
+
+    if let Some(mut child) = daemon_to_stop {
+        let _ = daemon::stop_daemon(&mut child);
+    }
+    if service_enabled {
+        ensure_daemon(app, state).await;
     }
 }
 

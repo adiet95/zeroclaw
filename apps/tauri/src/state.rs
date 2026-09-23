@@ -1,6 +1,7 @@
 //! Shared application state for Tauri.
 
-use std::sync::Arc;
+use std::process::Child;
+use std::sync::{Arc, Mutex};
 use tokio::sync::RwLock;
 
 /// Agent status as reported by the gateway.
@@ -19,6 +20,8 @@ pub struct AppState {
     pub token: Option<String>,
     pub connected: bool,
     pub agent_status: AgentStatus,
+    pub service_enabled: bool,
+    pub owned_daemon: Arc<Mutex<Option<Child>>>,
 }
 
 impl Default for AppState {
@@ -28,6 +31,8 @@ impl Default for AppState {
             token: None,
             connected: false,
             agent_status: AgentStatus::Idle,
+            service_enabled: true,
+            owned_daemon: Arc::new(Mutex::new(None)),
         }
     }
 }
@@ -51,6 +56,7 @@ mod tests {
         assert!(state.token.is_none());
         assert!(!state.connected);
         assert_eq!(state.agent_status, AgentStatus::Idle);
+        assert!(state.service_enabled);
     }
 
     #[test]
