@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { LogOut, Settings, ChevronDown, Menu, Globe, Search } from 'lucide-react';
+import { LogOut, Settings, ChevronDown, Menu, Globe, Search, Power } from 'lucide-react';
 import { t, SUPPORTED_LOCALES } from '@/lib/i18n';
 import { useLocaleContext } from '@/App';
 import { useAuth } from '@/hooks/useAuth';
 import { SettingsModal } from '@/components/SettingsModal';
 import { Button } from '@/components/ui';
+import { invokeDesktop, isTauri } from '@/lib/tauri';
 
 // Exact-path titles. The dashboard ('/') must stay exact so it doesn't
 // swallow every other route as a prefix.
@@ -55,6 +56,8 @@ export default function Header({ onMenuToggle, onOpenPalette }: HeaderProps) {
   const { locale, setAppLocale } = useLocaleContext();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
+  const [serviceActive, setServiceActive] = useState(true);
+  const [serviceBusy, setServiceBusy] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
 
   // Fall back to a plain title for unknown routes rather than mislabeling
@@ -62,6 +65,24 @@ export default function Header({ onMenuToggle, onOpenPalette }: HeaderProps) {
   // mapped here showed "Dashboard" for the first-run flow.
   const titleKey = titleKeyFor(location.pathname);
   const pageTitle = titleKey ? t(titleKey) : '';
+
+  useEffect(() => {
+    if (isTauri()) {
+      void invokeDesktop<boolean>('get_service_status')
+        .then(setServiceActive)
+        .catch(() => { });
+    }
+  }, []);
+
+  const handleServiceToggle = async () => {
+    if (serviceBusy) return;
+    setServiceBusy(true);
+    try {
+      setServiceActive(await invokeDesktop<boolean>('toggle_service_command'));
+    } finally {
+      setServiceBusy(false);
+    }
+  };
 
   const handleLogout = () => {
     if (window.confirm(t('auth.logout_confirm'))) {
@@ -140,6 +161,21 @@ export default function Header({ onMenuToggle, onOpenPalette }: HeaderProps) {
           >
             <Settings className="h-[20px] w-[20px] shrink-0" />
           </Button>
+
+          {isTauri() && (
+            <Button
+              variant="ghost"
+              onClick={() => void handleServiceToggle()}
+              disabled={serviceBusy}
+              className="h-9 px-2.5 text-xs gap-1.5"
+              aria-label={serviceActive ? t('service.active') : t('service.inactive')}
+              title={serviceActive ? t('service.active') : t('service.inactive')}
+              style={{ color: serviceActive ? 'var(--color-status-success)' : 'var(--color-status-error)' }}
+            >
+              <Power className="h-4 w-4" />
+              <span className="hidden sm:inline">{serviceActive ? t('service.active') : t('service.inactive')}</span>
+            </Button>
+          )}
 
           {/* Language switcher dropdown */}
           <div ref={langRef} className="relative" style={{ zIndex: 9999 }}>

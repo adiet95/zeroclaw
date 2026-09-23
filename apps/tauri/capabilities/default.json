@@ -1,8 +1,17 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Local IPC permissions for bundled app content. Gateway-served content receives no remote capability or plugin command access.",
-  "windows": ["main", "splash"],
+  "description": "IPC permissions for bundled content and the local gateway dashboard.",
+  "windows": [
+    "main",
+    "splash"
+  ],
+  "remote": {
+    "urls": [
+      "http://127.0.0.1:42617/*",
+      "http://localhost:42617/*"
+    ]
+  },
   "permissions": [
     "core:default"
   ]

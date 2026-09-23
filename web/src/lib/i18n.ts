@@ -1838,6 +1838,8 @@ const translations: Record<Locale, Record<string, string>> = {
     'common.yes': 'Yes',
     'common.no': 'No',
     'common.search': 'Search...',
+    'service.active': 'Active',
+    'service.inactive': 'Inactive',
     'common.no_data': 'No data available.',
     'common.refresh': 'Refresh',
     'common.back': 'Back',

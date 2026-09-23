@@ -134,6 +134,21 @@ pub(crate) async fn toggle_service<R: tauri::Runtime>(
     }
 }
 
+#[tauri::command]
+async fn get_service_status(state: tauri::State<'_, state::SharedState>) -> Result<bool, String> {
+    Ok(state.read().await.service_enabled)
+}
+
+#[tauri::command]
+async fn toggle_service_command(
+    app: tauri::AppHandle,
+    state: tauri::State<'_, state::SharedState>,
+) -> Result<bool, String> {
+    let shared = state.inner().clone();
+    toggle_service(app, shared.clone()).await;
+    Ok(shared.read().await.service_enabled)
+}
+
 /// Attempt to auto-pair with the gateway so the WebView has a valid token
 /// before the React frontend mounts. Runs on localhost so the admin endpoints
 /// are accessible without auth.
@@ -265,6 +280,8 @@ pub fn run() {
             commands::pairing::get_devices,
             commands::agent::send_message,
             open_dashboard,
+            get_service_status,
+            toggle_service_command,
             capabilities::screenshot::take_screenshot,
             capabilities::applescript::run_applescript,
         ])
