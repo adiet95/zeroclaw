@@ -11,7 +11,7 @@ pub mod tray;
 
 use gateway_client::GatewayClient;
 use state::shared_state;
-use tauri::{Emitter, Manager, RunEvent, WebviewUrl, WebviewWindowBuilder};
+use tauri::{Emitter, Manager, RunEvent, WebviewUrl, WebviewWindowBuilder, WindowEvent};
 
 /// Loopback port the desktop app expects the gateway/daemon on. Matches the
 /// port baked into [`state::AppState::default`]'s `gateway_url`.
@@ -243,14 +243,18 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
-            // When a second instance launches, focus whichever surface is current.
+            // A second shortcut launch must revive the existing instance rather
+            // than leave a failed splash waiting forever in the background.
             let target = app
-                .get_webview_window("splash")
-                .or_else(|| app.get_webview_window("main"));
+                .get_webview_window("main")
+                .or_else(|| app.get_webview_window("splash"));
             if let Some(window) = target {
                 let _ = window.show();
                 let _ = window.set_focus();
             }
+
+            let state = app.state::<state::SharedState>().inner().clone();
+            tauri::async_runtime::spawn(ensure_daemon(app.clone(), state));
         }))
         .manage(shared.clone())
         .invoke_handler(tauri::generate_handler![
@@ -291,6 +295,16 @@ pub fn run() {
             health::spawn_health_poller(app.handle().clone(), shared.clone());
 
             Ok(())
+        })
+        .on_window_event(|window, event| {
+            if window.label() == "main"
+                && let WindowEvent::CloseRequested { api, .. } = event
+            {
+                // Closing the dashboard hides the app; the tray and daemon
+                // remain available, and the shortcut can show it again.
+                api.prevent_close();
+                let _ = window.hide();
+            }
         })
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
